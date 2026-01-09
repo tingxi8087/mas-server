@@ -1,8 +1,28 @@
 {
-  "name": "mas-node",
-  "module": "src/index.ts",
+  "name": "mas-server",
+  "version": "4.0.0-beta.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
-  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "private": false,
+  "scripts": {
+    "build": "bun run build:js && bun run build:types",
+    "build:js": "bun build src/index.ts --outdir ./dist --target node --format esm --minify --external express --external morgan --external rotating-file-stream --external ansi-colors --external moment",
+    "build:types": "tsc --project tsconfig.build.json",
+    "prepublishOnly": "bun run build",
+    "debug": "bun run --watch debug.ts",
+    "testServer": "bun run --watch test/src/main.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/morgan": "^1.9.10",
@@ -12,14 +32,11 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.7.4",
+    "typescript": "^5",
     "typescript-eslint": "^8.51.0"
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "scripts": {
-    "debug": "bun run --watch debug.ts",
-    "testServer": "bun run --watch test/src/main.ts"
   },
   "dependencies": {
     "@types/express": "^5.0.6",
