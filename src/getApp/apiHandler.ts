@@ -75,7 +75,7 @@ export function createApiHandler(
           if (format === Number) normalized = Number(value);
           if (format === Boolean)
             normalized = value === 'true' || value === '1' || value === 'yes';
-          if (!validType(normalized, format as any, false)) {
+          if (!validType(normalized, format, false)) {
             return (res as any).reply?.(
               null,
               0,
@@ -105,7 +105,7 @@ export function createApiHandler(
 
       // requestFormat 校验
       if (cfg?.requestFormat) {
-        const ok = validType(req.body, cfg.requestFormat as any, !!cfg.strict);
+        const ok = validType(req.body, cfg.requestFormat, !!cfg.strict);
         if (!ok) {
           return (res as any).reply?.(null, 0, 400, '请求参数格式错误');
         }
