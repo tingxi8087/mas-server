@@ -21,7 +21,8 @@
     "build:types": "tsc --project tsconfig.build.json",
     "prepublishOnly": "bun run build",
     "debug": "bun run --watch debug.ts",
-    "testServer": "bun run --watch test/src/main.ts"
+    "testServer": "bun run --watch test/src/main.ts",
+    "sync": "bun run build && npm publish --registry=https://registry.npmjs.org && cnpm sync mas-server && explorer \"https://npmmirror.com/package/mas-server\""
   },
   "devDependencies": {
     "@types/bun": "latest",
