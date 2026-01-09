@@ -156,8 +156,8 @@ export function createApiHandler(
       }
 
       // token 校验（全局开关 + 单接口开关）
-      if (appConfig.token.open && cfg?.token) {
-        const tokenKey = appConfig.token.headerParams;
+      if (appConfig?.token?.open && cfg?.token) {
+        const tokenKey = appConfig?.token?.headerParams || '';
         const token =
           (req.headers[tokenKey.toLowerCase()] as any) ??
           (req.query as any)?.[tokenKey] ??
