@@ -11,6 +11,7 @@ import { createApiHandler, type LoadedApiModule } from './apiHandler';
 import { buildApiDocForDebug, serializeMasConfigForDoc } from './docTransform';
 import attachLogs, { attachConsoleLogs } from './logs';
 import { openCors } from '../middleware/openCors';
+import c from 'ansi-colors';
 
 /**
  * 创建 MAS Express 应用并挂载约定式路由。
@@ -106,7 +107,7 @@ export async function getApp(
     app.get(`/debug/docs`, async (req, res) => {
       const list: Array<{
         path: string;
-        file: string;
+        file?: string;
         config?: any;
         doc?: any;
       }> = [];
@@ -116,14 +117,16 @@ export async function getApp(
         const rawDoc = (item.mod as any).doc;
         list.push({
           path: item.apiPath,
-          file: item.file,
+          // file: item.file,
           config: serializeMasConfigForDoc(rawConfig),
           doc: buildApiDocForDebug(rawConfig, rawDoc),
         });
       }
-
       (res as any).reply?.(list);
     });
+    console.log(
+      `接口文档信息接口已开启，访问地址 ${c.yellow('/debug/docs')} - ${c.red('生产模式请关闭！')}`
+    );
   }
 
   // 兜底：如果存在 defalutApiPath，则在 404 时调用它
