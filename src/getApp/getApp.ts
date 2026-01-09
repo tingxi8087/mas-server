@@ -26,10 +26,9 @@ export async function getApp(
 ) {
   const app = express();
   beforeMounted && beforeMounted(app);
-
   // 自动探测默认路径 + 合并配置
   const detected = resolveApisPaths(dirname);
-  defaultConfig.logs.logPath = path.join(dirname, 'logs');
+  defaultConfig.logs!.logPath = path.join(dirname, 'logs');
   defaultConfig.apisPath = detected.apisPath;
   defaultConfig.defalutApiPath = detected.defalutApiPath;
   const finalConfig = mergeAppConfig(defaultConfig, config);
@@ -57,17 +56,17 @@ export async function getApp(
   app.use(quickSend);
 
   // debug log（控制台）：直接打印 morgan 那一行
-  if (finalConfig.logs.debug) {
+  if (finalConfig?.logs?.debug) {
     attachConsoleLogs(app, {
-      logRequestBody: finalConfig.logs.logRequestBody,
-      logResponseBody: finalConfig.logs.logResponseBody,
-      maxBodyLength: finalConfig.logs.maxBodyLength,
-      redactKeys: finalConfig.logs.redactKeys,
+      logRequestBody: finalConfig?.logs?.logRequestBody,
+      logResponseBody: finalConfig?.logs?.logResponseBody,
+      maxBodyLength: finalConfig?.logs?.maxBodyLength,
+      redactKeys: finalConfig?.logs?.redactKeys,
     });
   }
 
   // access log（落盘）
-  if (finalConfig.logs.open && finalConfig.logs.logPath) {
+  if (finalConfig?.logs?.open && finalConfig?.logs?.logPath) {
     attachLogs(app, finalConfig.logs.logPath, {
       logRequestBody: finalConfig.logs.logRequestBody,
       logResponseBody: finalConfig.logs.logResponseBody,
@@ -103,7 +102,7 @@ export async function getApp(
   }
 
   // 文档聚合：GET `/debug/docs`（可通过配置控制是否暴露）
-  if (finalConfig.exposeApiDocs !== false) {
+  if (finalConfig.exposeApiDocs === true) {
     app.get(`/debug/docs`, async (req, res) => {
       const list: Array<{
         path: string;

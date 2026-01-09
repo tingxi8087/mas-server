@@ -184,11 +184,11 @@ export type ApisDoc = {
 };
 
 export type MasAppConfig = {
-  logs: {
+  logs?: {
     /** 是否记录日志 */
-    open: boolean;
+    open?: boolean;
     /** 是否打印访问日志 */
-    debug: boolean;
+    debug?: boolean;
     /** 日志路径，默认 logs/ */
     logPath?: string;
     /**
@@ -208,13 +208,13 @@ export type MasAppConfig = {
      */
     redactKeys?: string[];
   };
-  token: {
+  token?: {
     /** 是否使用token */
-    open: boolean;
+    open?: boolean;
     /** token密钥，密钥中只能包含大小写字母和数字 */
-    pwd: string;
+    pwd?: string;
     /** 参数名 */
-    headerParams: string;
+    headerParams?: string;
   };
   /** 接口路径，默认src/apis 或 apis/ */
   apisPath?: string;

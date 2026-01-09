@@ -234,11 +234,11 @@ const app = await getApp(__dirname, {
 
 框架会自动生成 API 文档，访问 `/debug/docs` 即可查看所有接口的配置和文档信息。
 
-可以通过配置关闭：
+可以通过配置开启：
 
 ```typescript
 const app = await getApp(__dirname, {
-  exposeApiDocs: false, // 关闭 API 文档
+  exposeApiDocs: true, // 开启 API 文档
 });
 ```
 
@@ -313,7 +313,7 @@ interface MasAppConfig {
   corsUrl?: string[]; // 跨域允许的地址
   staticPath?: string; // 静态文件目录路径，默认 public/
   staticUrl?: string; // 静态资源访问路径前缀，默认 /public
-  exposeApiDocs?: boolean; // 是否暴露接口文档，默认 true
+  exposeApiDocs?: boolean; // 是否暴露接口文档，默认 false
 }
 ```
 
