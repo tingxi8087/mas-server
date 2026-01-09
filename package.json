@@ -1,25 +1,8 @@
 {
   "name": "mas-node",
-  "version": "1.0.0",
+  "module": "src/index.ts",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "bun run build",
-    "debug": "bun run --watch debug.ts",
-    "testServer": "bun run --watch test/src/main.ts"
-  },
+  "private": true,
   "devDependencies": {
     "@types/bun": "latest",
     "@types/morgan": "^1.9.10",
@@ -29,11 +12,14 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.7.4",
-    "typescript": "^5",
     "typescript-eslint": "^8.51.0"
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "scripts": {
+    "debug": "bun run --watch debug.ts",
+    "testServer": "bun run --watch test/src/main.ts"
   },
   "dependencies": {
     "@types/express": "^5.0.6",
