@@ -1,15 +1,22 @@
 import type { Request, Response } from 'express';
 import type {
   TypeFromValidFormat,
+  TypeFromValidFormatForQuery,
   ValidFormat,
 } from './utils/typeFromValidFormat';
 /**
  * 请求类型
  */
-export type MasReq<TRequestFormat = any> = Request<
+export type MasReq<
+  TRequestFormat = any,
+  TMethod extends HttpMethod = HttpMethod,
+> = Request<
   any,
   any,
-  TypeFromValidFormat<TRequestFormat>
+  // GET：不再从 body 取参；非 GET：body 才参与校验/断言
+  TMethod extends 'get' ? any : TypeFromValidFormat<TRequestFormat>,
+  // GET：入参来自 query；非 GET：query 不做推导（保持 any）
+  TMethod extends 'get' ? TypeFromValidFormatForQuery<TRequestFormat> : any
 >;
 
 /**
@@ -18,12 +25,20 @@ export type MasReq<TRequestFormat = any> = Request<
 export type MasConfigLike = {
   requestFormat?: any;
   responseFormat?: any;
+  methods?: HttpMethod;
 };
 
 /**
  * HTTP 方法类型。
  */
 export type HttpMethod = 'get' | 'post' | 'all';
+
+/**
+ * GET 请求的 requestFormat 约束：
+ * - query 只允许 string，因此这里只允许 `String`（必填）或 `_String`（可选）
+ * - 明确不允许 Number / Boolean / Object / -1 / 数组 / 嵌套对象
+ */
+export type GetRequestFormat = Record<string, StringConstructor | '?'>;
 
 /**
  * MAS 接口的完整配置类型。
@@ -35,26 +50,52 @@ export type MasConfig<
     string,
     ValidFormat
   >,
-> = {
-  /** 接口名称 */
-  name?: string;
-  /** 是否严格模式（strict=true 时对象不允许出现多余字段） */
-  strict?: boolean;
-  /** HTTP 方法 */
-  methods?: HttpMethod;
-  /** Content-Type */
-  contentType?: string;
-  /** Header 参数格式（key 为参数名，value 为类型描述符） */
-  header?: THeader;
-  /** 请求体格式 */
-  requestFormat?: TRequestFormat;
-  /** 响应体格式 */
-  responseFormat?: TResponseFormat;
-  /** 是否需要 token 验证 */
-  token?: boolean;
-  /** 权限列表 */
-  permission?: string[];
-};
+> =
+  | {
+      /** 接口名称 */
+      name?: string;
+      /** 是否严格模式（strict=true 时对象不允许出现多余字段） */
+      strict?: boolean;
+      /** HTTP 方法（非 GET） */
+      methods?: Exclude<HttpMethod, 'get'>;
+      /** Content-Type */
+      contentType?: string;
+      /** Header 参数格式（key 为参数名，value 为类型描述符） */
+      header?: THeader;
+      /** 请求体格式（非 GET：校验/断言 req.body） */
+      requestFormat?: TRequestFormat;
+      /** 响应体格式 */
+      responseFormat?: TResponseFormat;
+      /** 是否需要 token 验证 */
+      token?: boolean;
+      /** 权限列表 */
+      permission?: string[];
+    }
+  | {
+      /** 接口名称 */
+      name?: string;
+      /** 是否严格模式（strict=true 时对象不允许出现多余字段） */
+      strict?: boolean;
+      /** HTTP 方法（GET） */
+      methods: 'get';
+      /** Content-Type */
+      contentType?: string;
+      /** Header 参数格式（key 为参数名，value 为类型描述符） */
+      header?: THeader;
+      /**
+       * GET：入参来自 req.query，只允许 string，因此 requestFormat 必须是扁平的 string 描述
+       * （写 Number/数组/嵌套对象 会直接 TS 报错）
+       */
+      requestFormat?: TRequestFormat extends GetRequestFormat
+        ? TRequestFormat
+        : GetRequestFormat;
+      /** 响应体格式 */
+      responseFormat?: TResponseFormat;
+      /** 是否需要 token 验证 */
+      token?: boolean;
+      /** 权限列表 */
+      permission?: string[];
+    };
 
 /** 从配置中提取 requestFormat */
 type ReqFormatOf<TConfig> = TConfig extends {
@@ -62,6 +103,13 @@ type ReqFormatOf<TConfig> = TConfig extends {
 }
   ? NonNullable<TRequestFormat>
   : any;
+
+/** 从配置中提取 methods */
+type MethodOf<TConfig> = TConfig extends { methods?: infer TMethods }
+  ? NonNullable<TMethods> extends HttpMethod
+    ? NonNullable<TMethods>
+    : HttpMethod
+  : HttpMethod;
 
 /** 从配置中提取 responseFormat */
 type ResFormatOf<TConfig> = TConfig extends {
@@ -77,7 +125,7 @@ type ResFormatOf<TConfig> = TConfig extends {
  * `export default (async (req, res) => { ... }) satisfies MasHandler<typeof config>;`
  */
 export type MasHandler<TConfig extends MasConfigLike = MasConfigLike> = (
-  req: MasReq<ReqFormatOf<TConfig>>,
+  req: MasReq<ReqFormatOf<TConfig>, MethodOf<TConfig>>,
   res: MasRes<ResFormatOf<TConfig>>
 ) => any;
 

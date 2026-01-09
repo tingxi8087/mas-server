@@ -6,7 +6,7 @@ import {
 } from '../../../../src';
 const requestFormat = {
   name: String,
-  age: Number,
+  age: String,
 };
 const responseFormat = {
   test: [String],
@@ -20,6 +20,6 @@ export const config: MasConfig<typeof requestFormat, typeof responseFormat> = {
   methods: 'get',
 };
 export const handler: MasHandler<typeof config> = async (req, res) => {
-  console.log(req.query);
+  console.log(req.query, req.body);
   res.reply({ test: [''] });
 };

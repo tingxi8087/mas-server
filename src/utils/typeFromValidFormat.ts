@@ -31,7 +31,7 @@ export type OptionalDescriptor = '?' | -1;
 /**
  * 运行时校验格式（requestFormat）的 TypeScript 结构。
  *
- * 注意：这里是“类型层”定义，用于推导 `req.body` 的类型；运行时仍由 `validType` 校验。
+ * 注意：这里是“类型层”定义，用于推导 **req.body 或 req.query** 的类型；运行时仍由 `validType` 校验。
  */
 export type ValidFormat =
   | BasicTypeDescriptor
@@ -105,5 +105,35 @@ export type TypeFromValidFormat<T> = T extends BasicTypeDescriptor
         ? // 对象字段：占位符字段推导为可选属性，其余字段为必填属性
           { [K in RequiredKeys<T>]: TypeFromValidFormat<T[K]> } & {
             [K in OptionalKeys<T>]?: TypeFromValidFormat<T[K]>;
+          }
+        : unknown;
+
+/**
+ * 面向 GET `req.query` 的推导版本：
+ * - GET 约束 query 仅允许 string（以及 string[]），因此 Number/Boolean/Object/-1 会推导为 never
+ * - 这能让“GET 写了 Number requestFormat”在 TS 层直接报错
+ */
+type QueryPrimitiveFromDescriptor<T> = T extends StringConstructor
+  ? string
+  : T extends NumberConstructor | BooleanConstructor | ObjectConstructor
+    ? never
+    : never;
+
+type QueryPrimitiveFromOptionalDescriptor<T> = T extends '?'
+  ? string
+  : T extends -1
+    ? never
+    : never;
+
+export type TypeFromValidFormatForQuery<T> = T extends BasicTypeDescriptor
+  ? QueryPrimitiveFromDescriptor<T>
+  : T extends OptionalDescriptor
+    ? QueryPrimitiveFromOptionalDescriptor<T>
+    : T extends readonly (infer _U)[]
+      ? // GET：requestFormat 不允许数组；若绕过约束，此处也推导为 never 以尽早暴露问题
+        never
+      : T extends object
+        ? { [K in RequiredKeys<T>]: TypeFromValidFormatForQuery<T[K]> } & {
+            [K in OptionalKeys<T>]?: TypeFromValidFormatForQuery<T[K]>;
           }
         : unknown;
