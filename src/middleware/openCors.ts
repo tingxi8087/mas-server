@@ -1,4 +1,5 @@
 import type { Express, Request, Response, NextFunction } from 'express';
+import { isMatch } from 'micromatch';
 
 /**
  * 检查 origin 是否在允许列表中（支持通配符匹配）。
@@ -13,16 +14,10 @@ function isOriginAllowed(
   if (!origin) return false;
   if (!allowedUrls || allowedUrls.length === 0) return true; // 未配置则允许所有
 
-  return allowedUrls.some((url) => {
-    // 精确匹配
-    if (url === origin) return true;
-    // 通配符匹配：支持 `*.example.com` 或 `http://*.example.com`
-    if (url.includes('*')) {
-      const pattern = url.replace(/\*/g, '.*').replace(/\./g, '\\.');
-      const regex = new RegExp(`^${pattern}$`);
-      return regex.test(origin);
-    }
-    return false;
+  return allowedUrls.some((pattern) => {
+    // 使用 micromatch 进行 glob 模式匹配，支持 `*.example.com` 等通配符
+    console.log(origin, pattern, isMatch(origin, pattern));
+    return isMatch(origin, pattern);
   });
 }
 

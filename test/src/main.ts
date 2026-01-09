@@ -4,6 +4,8 @@ import path from 'node:path';
 const PORT = 8087;
 const app = await getApp(path.resolve(__dirname, '..'), {
   exposeApiDocs: true,
+  openCors: true,
+  corsUrl: ['http://*.com:5173'],
 });
 
 const server = app.listen(PORT, () => {
