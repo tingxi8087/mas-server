@@ -14,3 +14,6 @@ export {
   type TypeFromValidFormat,
   type ValidFormat,
 } from './utils/typeFromValidFormat';
+
+import * as Express from 'express';
+export { Express };
