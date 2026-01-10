@@ -29,7 +29,15 @@ const quickSend: RequestHandler = (req, res, next) => {
       status = 0;
     }
     if (data instanceof Promise) data = await data;
-    // if (typeof data != "string") data = JSON.stringify(data);
+    if (typeof data != 'string') {
+      try {
+        data = JSON.stringify(data);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_) {
+        console.error('响应序列化失败', req.method, req.url, data);
+        data = '响应序列化失败';
+      }
+    }
     res.status(code).send({
       msg,
       status: status ? 1 : 0,
